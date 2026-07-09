@@ -35,8 +35,14 @@ Antes de lanzar el programa a embajadores externos:
 
 ---
 
-## 4. Pendiente de definir (no bloqueante para documentar, sí para lanzar)
+## 4. Reglas resueltas (2026-07-09) y pendientes
 
+**Resuelto:**
+- **Cierre directo del fundador (Juan) = venta directa**, sin comisión de embajador — Synapse retiene todo salvo la `cuota_socio` (ver `financial_model.md` §1.3).
+- **Atribución en canal fusionado (varios embajadores en un mismo WhatsApp):** cada cliente se atribuye a **un** embajador vía palabra clave o link único por embajador; si existe registro de la comunidad de origen previa a la fusión, esa es la atribución por defecto. Detalle operativo en `lanzamiento_1_secuencia.md` §5.
+- **Coexistencia con la `cuota_socio`:** la comisión del embajador y el 15%/25% del socio se calculan ambos sobre el precio facturado pero salen de bolsillos distintos — el embajador cobra su tramo, el socio cobra del lado de Synapse. No se restan entre sí; ambos reducen el margen retenido por Synapse (ver tabla en `financial_model.md` §2.1).
+
+**Pendiente:**
 - Ventana de pago de comisión (¿al confirmarse el pago del cliente, o con algún período de gracia por reembolsos/chargebacks?).
 - Qué pasa si el cliente cancela o no renueva — ¿el embajador pierde el derecho a comisión futura de ese cliente automáticamente?
-- Tracking: cómo se atribuye un cliente a un embajador específico (código de referido, link único, etc.) — esto es un requerimiento técnico, no de este documento, pero debe resolverse antes de operar el programa.
+- Implementación técnica del tracking (código/link único por embajador) para operar la atribución a escala más allá del primer lote.

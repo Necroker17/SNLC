@@ -39,6 +39,18 @@ Datos ya confirmados (no son variables, son constantes del modelo):
 | `comision_primera_venta` | 50% |
 | `comision_reconsumo` | 25% (segunda compra del cliente en adelante) |
 
+### 1.3 Reparto al socio (confirmado 2026-07-09)
+
+`cuota_socio` — participación del socio/estratega sobre el **total facturado**, tomada del lado de Synapse (el socio gana *con* Synapse, no es un embajador y no compite contra la comisión del embajador):
+
+| Variable | Valor |
+|---|---|
+| `cuota_socio` | **15%** del total facturado en el **Lanzamiento 1** · **25%** en el **Lanzamiento 2** |
+
+- Se computa sobre **toda** venta del lote (directa, 1ra venta vía embajador y re-consumo), sobre el precio facturado.
+- Es una **distribución de Synapse**, no un costo operativo: reduce el margen *retenido* por Synapse, no el ingreso del embajador.
+- **Cierres directos del fundador (Juan) = venta directa** (sin comisión de embajador): Synapse retiene todo salvo la `cuota_socio`.
+
 ---
 
 ## 2. Fórmula de margen por venta individual
@@ -48,18 +60,39 @@ Para una venta de un cliente **referido por un embajador**:
 ```
 ingreso_neto_pago      = precio_plan × (1 − fee_pago)
 comision_embajador     = precio_plan × tasa_comision      [50% si es 1ra venta del cliente; 25% si es re-consumo]
+cuota_socio            = precio_plan × cuota_socio_%       [15% Lanzamiento 1; 25% Lanzamiento 2]
 costo_operativo_plan   = (costo_soporte_mensual + costo_herramientas_mensual_por_cliente) × duracion_meses_plan
-margen_neto            = ingreso_neto_pago − comision_embajador − costo_operativo_plan
-margen_neto_%          = margen_neto / precio_plan
+margen_neto_synapse    = ingreso_neto_pago − comision_embajador − cuota_socio − costo_operativo_plan
+margen_neto_%          = margen_neto_synapse / precio_plan
 ```
 
 Nota: esta fórmula de margen "por venta" NO incluye `costo_fijo_mensual_negocio` (los $150/mes de TradingView + Make + Manychat + Skool + Claude) porque ese costo no varía con el número de clientes — se resta a nivel negocio, no a nivel de una venta individual. Ver la fórmula de proyección mensual (sección 4) para dónde entra.
 
-Para una venta **sin embajador** (adquisición directa, sin comisión):
+Para una venta **directa** (sin embajador — incluye los cierres directos del fundador):
 
 ```
-margen_neto = ingreso_neto_pago − costo_operativo_plan
+margen_neto_synapse = ingreso_neto_pago − cuota_socio − costo_operativo_plan
 ```
+
+### 2.1 Remanente bruto antes de costos — Lanzamiento 1 (`cuota_socio` = 15%, precio de lanzamiento)
+
+Reparto del precio facturado **antes** de restar `fee_pago` y `costo_operativo_plan` (ambos pendientes). Deja ver el techo de margen de Synapse por tipo de venta:
+
+| Tipo de venta | Embajador | Socio (15%) | **Synapse retiene** |
+|---|---|---|---|
+| Directa / cierre de Juan | 0% | 15% | **85%** |
+| 1ra venta vía embajador | 50% | 15% | **35%** |
+| Re-consumo vía embajador | 25% | 15% | **60%** |
+
+En dólares (precio de lanzamiento), remanente de Synapse antes de `fee_pago` y costo operativo:
+
+| Plan (precio) | Directa (85%) | 1ra venta emb. (35%) | Re-consumo (60%) |
+|---|---|---|---|
+| STANDARD ($197) | $167.45 | **$68.95** | $118.20 |
+| PRO ($299) | $254.15 | **$104.65** | $179.40 |
+| PREMIUM ($699) | $594.15 | **$244.65** | $419.40 |
+
+> **Peor caso del lanzamiento:** STANDARD, 1ra venta vía embajador — Synapse arranca con $68.95 (35% del precio) para cubrir fee de pago + 3 meses de soporte + utilidad. En el **Lanzamiento 2** la `cuota_socio` sube a 25%, por lo que ese mismo caso deja a Synapse en 25% del precio ($49.25 en STANDARD) — validar contra costos antes de fijarlo.
 
 ---
 
@@ -104,10 +137,11 @@ clientes_directos           = clientes_nuevos_mes − clientes_via_embajador
 ingreso_bruto_mes           = Σ (clientes_por_plan × precio_plan)
 comision_pagada_mes         = Σ (clientes_via_embajador_por_plan × precio_plan × 50%)
                               + Σ (reconsumos_via_embajador_por_plan × precio_plan × 25%)
-margen_neto_mes             = ingreso_bruto_mes − comision_pagada_mes − costo_fijo_mensual_negocio − costos_variables_totales_mes
+cuota_socio_mes             = ingreso_bruto_mes × cuota_socio_%     [15% Lanzamiento 1; 25% Lanzamiento 2]
+margen_neto_mes             = ingreso_bruto_mes − comision_pagada_mes − cuota_socio_mes − costo_fijo_mensual_negocio − costos_variables_totales_mes
 ```
 
-Donde `costo_fijo_mensual_negocio` = $150/mes (sección 1.1, ya confirmado) y `costos_variables_totales_mes` = los costos de soporte/herramientas por cliente de la sección 1.2 (aún pendientes) × número de clientes activos ese mes.
+Donde `costo_fijo_mensual_negocio` = $150/mes (sección 1.1, ya confirmado), `cuota_socio_mes` es la distribución al socio sobre el total facturado (sección 1.3), y `costos_variables_totales_mes` = los costos de soporte/herramientas por cliente de la sección 1.2 (aún pendientes) × número de clientes activos ese mes.
 
 Ninguna de estas variables tiene valor todavía — son los inputs que la hoja de Sheets debe dejar editables para correr distintos escenarios (optimista/base/conservador).
 
